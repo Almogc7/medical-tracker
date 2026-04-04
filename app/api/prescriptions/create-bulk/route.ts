@@ -47,20 +47,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid person" }, { status: 400 });
   }
 
-  const tempPath = path.join(process.cwd(), "public", "uploads", "tmp", `${data.uploadToken}.pdf`);
+  const isBlobUpload = /^https?:\/\//i.test(data.uploadToken);
 
-  try {
-    await stat(tempPath);
-  } catch {
-    return NextResponse.json({ error: "Upload token not found" }, { status: 400 });
+  let pdfPath: string;
+  if (isBlobUpload) {
+    pdfPath = data.uploadToken;
+  } else {
+    const tempPath = path.join(process.cwd(), "public", "uploads", "tmp", `${data.uploadToken}.pdf`);
+
+    try {
+      await stat(tempPath);
+    } catch {
+      return NextResponse.json({ error: "Upload token not found" }, { status: 400 });
+    }
+
+    const finalName = generateStoredFilename(data.originalFileName);
+    const finalDir = path.join(process.cwd(), "public", "uploads", "prescriptions");
+    await mkdir(finalDir, { recursive: true });
+    const finalPath = path.join(finalDir, finalName);
+
+    await rename(tempPath, finalPath);
+    pdfPath = `uploads/prescriptions/${finalName}`;
   }
-
-  const finalName = generateStoredFilename(data.originalFileName);
-  const finalDir = path.join(process.cwd(), "public", "uploads", "prescriptions");
-  await mkdir(finalDir, { recursive: true });
-  const finalPath = path.join(finalDir, finalName);
-
-  await rename(tempPath, finalPath);
 
   const created = await prisma.$transaction(
     data.monthEntries.map((entry, index) => {
@@ -75,7 +83,7 @@ export async function POST(request: Request) {
           notes: data.notes,
           startDate,
           expirationDate,
-          pdfPath: `uploads/prescriptions/${finalName}`,
+          pdfPath,
           originalFileName: data.originalFileName,
           extractedText: data.extractedText,
           status: autoStatusUpdate({

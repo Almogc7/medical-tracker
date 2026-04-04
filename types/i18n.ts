@@ -101,6 +101,8 @@ export type TranslationDict = {
     removeMonth: string;
     saveAllMonths: string;
     nothingToSave: string;
+    noPeopleAvailable: string;
+    selectPersonBeforeSave: string;
   };
   notifications: {
     title: string;

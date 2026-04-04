@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { put } from "@vercel/blob";
 
 import { NextResponse } from "next/server";
 
@@ -42,12 +43,22 @@ export async function POST(request: Request) {
 
   const parsed = detectDatesFromText(extractedText);
   const monthlyRanges = detectMonthlyDateRangesFromText(extractedText);
-  const uploadToken = randomUUID();
+  let uploadToken: string = randomUUID();
   const filename = generateStoredFilename(file.name);
 
-  const tempDir = path.join(process.cwd(), "public", "uploads", "tmp");
-  await mkdir(tempDir, { recursive: true });
-  await writeFile(path.join(tempDir, `${uploadToken}.pdf`), buffer);
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(`prescriptions/${filename}`, buffer, {
+      access: "public",
+      contentType: "application/pdf",
+      addRandomSuffix: false,
+    });
+
+    uploadToken = blob.url;
+  } else {
+    const tempDir = path.join(process.cwd(), "public", "uploads", "tmp");
+    await mkdir(tempDir, { recursive: true });
+    await writeFile(path.join(tempDir, `${uploadToken}.pdf`), buffer);
+  }
 
   return NextResponse.json({
     uploadToken,

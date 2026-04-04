@@ -31,9 +31,10 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
   const [parsed, setParsed] = useState<ParseResult | null>(null);
   const [monthEntries, setMonthEntries] = useState<MonthEntry[]>([]);
   const [message, setMessage] = useState<string | null>(null);
+  const [parsing, setParsing] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const canParse = useMemo(() => personId && file, [personId, file]);
+  const canParse = useMemo(() => Boolean(file) && !parsing, [file, parsing]);
 
   async function parsePdf() {
     if (!file) {
@@ -44,35 +45,51 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("/api/prescriptions/parse", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      setParsing(true);
+      const response = await fetch("/api/prescriptions/parse", {
+        method: "POST",
+        body: formData,
+      });
 
-    const payload = (await response.json()) as ParseResult | { error?: string };
+      const payload = (await response.json().catch(() => ({}))) as ParseResult | { error?: string };
 
-    if (!response.ok) {
-      setMessage("error" in payload ? payload.error || t.prescriptions.parseError : t.prescriptions.parseError);
-      return;
+      if (!response.ok) {
+        setMessage("error" in payload ? payload.error || t.prescriptions.parseError : t.prescriptions.parseError);
+        return;
+      }
+
+      const parseResult = payload as ParseResult;
+      setParsed(parseResult);
+      setTitle(parseResult.suggestedTitle || title);
+      const parsedEntries = Array.isArray(parseResult.monthEntries)
+        ? parseResult.monthEntries.filter((entry: MonthEntry) => entry.startDate && entry.expirationDate)
+        : [];
+
+      const fallbackEntry = parseResult.startDate && parseResult.expirationDate
+        ? [{ startDate: parseResult.startDate, expirationDate: parseResult.expirationDate }]
+        : [];
+
+      setMonthEntries(parsedEntries.length ? parsedEntries : fallbackEntry);
+      setMessage(parsedEntries.length > 1 ? t.prescriptions.monthlyDetected : t.prescriptions.reviewMessage);
+    } catch {
+      setMessage(t.prescriptions.parseError);
+    } finally {
+      setParsing(false);
     }
-
-    const parseResult = payload as ParseResult;
-    setParsed(parseResult);
-    setTitle(parseResult.suggestedTitle || title);
-    const parsedEntries = Array.isArray(parseResult.monthEntries)
-      ? parseResult.monthEntries.filter((entry: MonthEntry) => entry.startDate && entry.expirationDate)
-      : [];
-
-    const fallbackEntry = parseResult.startDate && parseResult.expirationDate
-      ? [{ startDate: parseResult.startDate, expirationDate: parseResult.expirationDate }]
-      : [];
-
-    setMonthEntries(parsedEntries.length ? parsedEntries : fallbackEntry);
-    setMessage(parsedEntries.length > 1 ? t.prescriptions.monthlyDetected : t.prescriptions.reviewMessage);
   }
 
   async function savePrescription() {
-    if (!parsed || !personId || !title) {
+    if (!parsed) {
+      return;
+    }
+
+    if (!personId) {
+      setMessage(t.prescriptions.selectPersonBeforeSave);
+      return;
+    }
+
+    if (!title) {
       return;
     }
 
@@ -137,7 +154,9 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
             className="w-full rounded-lg border border-slate-300 px-3 py-2"
             value={personId}
             onChange={(event) => setPersonId(event.target.value)}
+            disabled={!people.length}
           >
+            {!people.length ? <option value="">{t.prescriptions.noPeopleAvailable}</option> : null}
             {people.map((person) => (
               <option key={person.id} value={person.id}>
                 {person.fullName}
@@ -163,7 +182,7 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
         onClick={parsePdf}
         className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
       >
-        Parse PDF
+        {parsing ? t.common.loading : "Parse PDF"}
       </button>
 
       {parsed ? (
@@ -223,8 +242,8 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
           <button
             type="button"
             onClick={savePrescription}
-            disabled={saving}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+            disabled={saving || !personId}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
             {saving ? t.common.loading : t.prescriptions.saveAllMonths}
           </button>

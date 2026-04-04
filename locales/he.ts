@@ -101,6 +101,8 @@ export const he: TranslationDict = {
     removeMonth: "הסר חודש",
     saveAllMonths: "שמור את כל החודשים",
     nothingToSave: "אין חודשים לשמירה.",
+    noPeopleAvailable: "אין אנשים זמינים. הוסף מישהו בעמוד האנשים.",
+    selectPersonBeforeSave: "יש לבחור אדם לפני השמירה.",
   },
   notifications: {
     title: "התראות",

@@ -101,6 +101,8 @@ export const en: TranslationDict = {
     removeMonth: "Remove month",
     saveAllMonths: "Save all months",
     nothingToSave: "No monthly entries to save.",
+    noPeopleAvailable: "No people available. Add someone in the People page.",
+    selectPersonBeforeSave: "Select a person before saving.",
   },
   notifications: {
     title: "Notifications",

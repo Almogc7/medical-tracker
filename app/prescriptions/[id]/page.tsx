@@ -9,6 +9,7 @@ import { getDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { getReadableDaysRemaining } from "@/services/prescription-service";
 import { formatDateInIsrael } from "@/utils/date";
+import { resolvePdfHref } from "@/utils/pdf-path";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,7 @@ export default async function PrescriptionDetailPage({ params }: { params: Promi
         <p className="text-sm text-slate-700">{t.common.daysRemaining}: {getReadableDaysRemaining(prescription.expirationDate)}</p>
         <p className="text-sm text-slate-700">{t.common.notes}: {prescription.notes || "-"}</p>
         <div className="pt-2">
-          <Link href={`/${prescription.pdfPath}`} target="_blank" className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700">
+          <Link href={resolvePdfHref(prescription.pdfPath)} target="_blank" className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700">
             {t.common.viewPdf}
           </Link>
         </div>

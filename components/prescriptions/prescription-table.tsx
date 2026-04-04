@@ -8,6 +8,7 @@ import type { PrescriptionStatus } from "@/types/domain";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useLocale } from "@/components/ui/locale-provider";
+import { resolvePdfHref } from "@/utils/pdf-path";
 
 type Row = {
   id: string;
@@ -62,7 +63,7 @@ export function PrescriptionTable({
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
                     <Link
-                      href={`/${row.pdfPath}`}
+                      href={resolvePdfHref(row.pdfPath)}
                       target="_blank"
                       className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-700"
                     >
