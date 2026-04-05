@@ -12,6 +12,8 @@ export const en: TranslationDict = {
     hello: "Hello",
     notifications: "Notifications",
     language: "Language",
+    menu: "Menu",
+    closeMenu: "Close menu",
     logout: "Logout",
   },
   auth: {

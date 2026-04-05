@@ -20,7 +20,7 @@ export function NotificationBell({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="relative rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+        className="relative whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
       >
         {t.navbar.notifications}
         {unread > 0 ? (
@@ -31,9 +31,9 @@ export function NotificationBell({
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-30 mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg">
+        <div className="absolute right-0 z-30 mt-2 w-[min(20rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-3 shadow-lg">
           <h3 className="mb-2 text-sm font-semibold text-slate-800">{t.notifications.title}</h3>
-          <div className="space-y-2">
+          <div className="max-h-80 space-y-2 overflow-y-auto">
             {items.length ? (
               items.map((item) => (
                 <div key={item.id} className="rounded-lg border border-slate-100 bg-slate-50 p-2">

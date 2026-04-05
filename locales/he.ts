@@ -12,6 +12,8 @@ export const he: TranslationDict = {
     hello: "שלום",
     notifications: "התראות",
     language: "שפה",
+    menu: "תפריט",
+    closeMenu: "סגור תפריט",
     logout: "התנתקות",
   },
   auth: {

@@ -31,9 +31,17 @@ export default async function PrescriptionDetailPage({ params }: { params: Promi
 
   return (
     <ProtectedPage>
-      <PageHeader title={prescription.title} subtitle={t.prescriptions.detail} actions={<Link href="/people" className="text-sm text-slate-600 underline">{t.common.back}</Link>} />
+      <PageHeader
+        title={prescription.title}
+        subtitle={t.prescriptions.detail}
+        actions={
+          <Link href="/people" className="inline-block text-sm text-slate-600 underline">
+            {t.common.back}
+          </Link>
+        }
+      />
       <Card className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-slate-600">{prescription.person.fullName}</p>
           <StatusBadge status={prescription.status} expirationDate={prescription.expirationDate} />
         </div>
@@ -42,7 +50,11 @@ export default async function PrescriptionDetailPage({ params }: { params: Promi
         <p className="text-sm text-slate-700">{t.common.daysRemaining}: {getReadableDaysRemaining(prescription.expirationDate)}</p>
         <p className="text-sm text-slate-700">{t.common.notes}: {prescription.notes || "-"}</p>
         <div className="pt-2">
-          <Link href={resolvePdfHref(prescription.pdfPath)} target="_blank" className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700">
+          <Link
+            href={resolvePdfHref(prescription.pdfPath)}
+            target="_blank"
+            className="inline-flex w-full justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 sm:w-auto"
+          >
             {t.common.viewPdf}
           </Link>
         </div>

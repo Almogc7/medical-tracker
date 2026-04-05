@@ -180,7 +180,7 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
         type="button"
         disabled={!canParse}
         onClick={parsePdf}
-        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 sm:w-auto"
       >
         {parsing ? t.common.loading : "Parse PDF"}
       </button>
@@ -222,7 +222,7 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
               <button
                 type="button"
                 onClick={() => removeMonthEntry(index)}
-                className="rounded-lg border border-rose-300 px-3 py-1 text-xs font-semibold text-rose-700"
+                className="w-full rounded-lg border border-rose-300 px-3 py-2 text-xs font-semibold text-rose-700 sm:w-auto sm:py-1"
               >
                 {t.prescriptions.removeMonth}
               </button>
@@ -243,7 +243,7 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
             type="button"
             onClick={savePrescription}
             disabled={saving || !personId}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className="w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 sm:w-auto"
           >
             {saving ? t.common.loading : t.prescriptions.saveAllMonths}
           </button>

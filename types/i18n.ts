@@ -12,6 +12,8 @@ export type TranslationDict = {
     hello: string;
     notifications: string;
     language: string;
+    menu: string;
+    closeMenu: string;
     logout: string;
   };
   auth: {
