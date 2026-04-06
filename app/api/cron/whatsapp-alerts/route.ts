@@ -12,10 +12,14 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const thresholdParam = url.searchParams.get("whatsappThresholdDays");
-  const parsedThreshold = thresholdParam ? Number.parseInt(thresholdParam, 10) : undefined;
+  let parsedThreshold: number | undefined;
 
-  if (thresholdParam && (!Number.isFinite(parsedThreshold) || parsedThreshold <= 0)) {
-    return NextResponse.json({ error: "Invalid whatsappThresholdDays" }, { status: 400 });
+  if (thresholdParam !== null) {
+    const candidate = Number.parseInt(thresholdParam, 10);
+    if (!Number.isFinite(candidate) || candidate <= 0) {
+      return NextResponse.json({ error: "Invalid whatsappThresholdDays" }, { status: 400 });
+    }
+    parsedThreshold = candidate;
   }
 
   await syncPrescriptionStatuses();
