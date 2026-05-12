@@ -70,7 +70,7 @@ model Notification {
   severity       NotificationSeverity @default(low)
   scheduledFor      DateTime
   sentAt            DateTime?
-  whatsappSentAt    DateTime?
+  telegramSentAt    DateTime?
   isRead            Boolean              @default(false)
   createdAt         DateTime             @default(now())
 

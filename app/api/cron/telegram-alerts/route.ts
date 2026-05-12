@@ -1,4 +1,4 @@
-import { generateNotificationsForThresholds, sendWhatsAppAlertsIfNeeded } from "@/services/notification-service";
+import { generateNotificationsForThresholds, sendTelegramAlertsIfNeeded } from "@/services/notification-service";
 import { syncPrescriptionStatuses } from "@/services/prescription-service";
 import { NextResponse } from "next/server";
 
@@ -11,20 +11,20 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const thresholdParam = url.searchParams.get("whatsappThresholdDays");
+  const thresholdParam = url.searchParams.get("telegramThresholdDays");
   let parsedThreshold: number | undefined;
 
   if (thresholdParam !== null) {
     const candidate = Number.parseInt(thresholdParam, 10);
     if (!Number.isFinite(candidate) || candidate <= 0) {
-      return NextResponse.json({ error: "Invalid whatsappThresholdDays" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid telegramThresholdDays" }, { status: 400 });
     }
     parsedThreshold = candidate;
   }
 
   await syncPrescriptionStatuses();
   await generateNotificationsForThresholds();
-  await sendWhatsAppAlertsIfNeeded({ thresholdDays: parsedThreshold });
+  await sendTelegramAlertsIfNeeded({ thresholdDays: parsedThreshold });
 
-  return NextResponse.json({ ok: true, whatsappThresholdDays: parsedThreshold ?? null });
+  return NextResponse.json({ ok: true, telegramThresholdDays: parsedThreshold ?? null });
 }

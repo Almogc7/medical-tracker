@@ -1,6 +1,6 @@
-import { EXPIRATION_THRESHOLDS, WHATSAPP_ALERT_THRESHOLD_DAYS } from "@/lib/constants";
+import { EXPIRATION_THRESHOLDS, TELEGRAM_ALERT_THRESHOLD_DAYS } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
-import { sendWhatsAppMessage } from "@/lib/twilio";
+import { sendTelegramMessage } from "@/lib/telegram";
 import type { NotificationSeverity } from "@/types/domain";
 import { daysUntilExpiration, isExpired, matchesThreshold } from "@/utils/date";
 
@@ -87,16 +87,14 @@ export async function unreadNotificationCount() {
   return prisma.notification.count({ where: { isRead: false } });
 }
 
-type SendWhatsAppOptions = {
+type SendTelegramOptions = {
   thresholdDays?: number;
 };
 
-export async function sendWhatsAppAlertsIfNeeded(options?: SendWhatsAppOptions): Promise<void> {
+export async function sendTelegramAlertsIfNeeded(options?: SendTelegramOptions): Promise<void> {
   const configured =
-    process.env.TWILIO_ACCOUNT_SID &&
-    process.env.TWILIO_AUTH_TOKEN &&
-    process.env.TWILIO_WHATSAPP_FROM &&
-    process.env.TWILIO_WHATSAPP_TO;
+    process.env.TELEGRAM_BOT_TOKEN &&
+    process.env.TELEGRAM_CHAT_ID;
 
   if (!configured) {
     return;
@@ -104,7 +102,7 @@ export async function sendWhatsAppAlertsIfNeeded(options?: SendWhatsAppOptions):
 
   const thresholds = options?.thresholdDays != null
     ? [options.thresholdDays]
-    : WHATSAPP_ALERT_THRESHOLD_DAYS;
+    : TELEGRAM_ALERT_THRESHOLD_DAYS;
 
   for (const thresholdDays of thresholds) {
     const notificationType = `expiring_${thresholdDays}d`;
@@ -112,7 +110,7 @@ export async function sendWhatsAppAlertsIfNeeded(options?: SendWhatsAppOptions):
     const pending = await prisma.notification.findMany({
       where: {
         type: notificationType,
-        whatsappSentAt: null,
+        telegramSentAt: null,
       },
       include: {
         prescription: {
@@ -124,16 +122,16 @@ export async function sendWhatsAppAlertsIfNeeded(options?: SendWhatsAppOptions):
     for (const notification of pending) {
       try {
         const { title, person } = notification.prescription;
-        await sendWhatsAppMessage(
+        await sendTelegramMessage(
           `Prescription Alert: "${title}" for ${person.fullName} expires in ${thresholdDays} days. Please take action.`,
         );
         await prisma.notification.update({
           where: { id: notification.id },
-          data: { whatsappSentAt: new Date() },
+          data: { telegramSentAt: new Date() },
         });
       } catch (error) {
         console.error(
-          `WhatsApp alert failed for notification ${notification.id}:`,
+          `Telegram alert failed for notification ${notification.id}:`,
           error,
         );
       }
