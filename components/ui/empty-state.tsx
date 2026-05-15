@@ -1,10 +1,8 @@
-import { Card } from "@/components/ui/card";
-
 export function EmptyState({ title, message }: { title: string; message: string }) {
   return (
-    <Card className="text-center">
-      <h3 className="text-base font-semibold text-slate-700">{title}</h3>
-      <p className="mt-2 text-sm text-slate-500">{message}</p>
-    </Card>
+    <div className="py-8 text-center">
+      <p className="text-sm font-medium text-slate-500">{title}</p>
+      <p className="mt-1 text-xs text-slate-400">{message}</p>
+    </div>
   );
 }

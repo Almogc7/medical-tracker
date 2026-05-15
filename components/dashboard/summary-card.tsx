@@ -1,5 +1,3 @@
-import { Card } from "@/components/ui/card";
-
 export function SummaryCard({
   label,
   value,
@@ -9,19 +7,19 @@ export function SummaryCard({
   value: number;
   tone: "green" | "amber" | "red" | "gray";
 }) {
-  const styles =
+  const valueClass =
     tone === "green"
-      ? "text-emerald-600"
+      ? "text-status-healthy"
       : tone === "amber"
-        ? "text-amber-600"
+        ? "text-status-warning"
         : tone === "red"
-          ? "text-rose-600"
-          : "text-slate-600";
+          ? "text-status-danger"
+          : "text-slate-500";
 
   return (
-    <Card>
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className={`mt-2 text-3xl font-bold ${styles}`}>{value}</p>
-    </Card>
+    <div className="flex flex-col gap-0.5 px-4 py-3 first:pl-0 last:pr-0">
+      <span className={`text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</span>
+      <span className="text-xs text-slate-500">{label}</span>
+    </div>
   );
 }

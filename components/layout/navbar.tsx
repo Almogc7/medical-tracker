@@ -20,32 +20,32 @@ export function Navbar({
   const { t } = useLocale();
 
   return (
-    <header className="flex flex-col gap-3 border-b border-slate-200 bg-white px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-slate-500">{t.appName}</p>
-        <button
-          type="button"
-          onClick={onMenuToggle}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 md:hidden"
-          aria-expanded={mobileMenuOpen}
-          aria-label={mobileMenuOpen ? t.navbar.closeMenu : t.navbar.menu}
-        >
-          <span className="flex flex-col gap-1" aria-hidden="true">
-            <span className="block h-0.5 w-4 bg-current" />
-            <span className="block h-0.5 w-4 bg-current" />
-            <span className="block h-0.5 w-4 bg-current" />
-          </span>
-          <span>{t.navbar.menu}</span>
-        </button>
-      </div>
-      <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:gap-3">
+    <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-surface px-4 sm:px-6">
+      <button
+        type="button"
+        onClick={onMenuToggle}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-border-subtle md:hidden"
+        aria-expanded={mobileMenuOpen}
+        aria-label={mobileMenuOpen ? t.navbar.closeMenu : t.navbar.menu}
+      >
+        <span className="flex flex-col gap-1" aria-hidden="true">
+          <span className="block h-0.5 w-4 bg-current" />
+          <span className="block h-0.5 w-4 bg-current" />
+          <span className="block h-0.5 w-4 bg-current" />
+        </span>
+      </button>
+
+      <div className="flex flex-1 items-center justify-end gap-2">
         <LanguageSwitcher />
         <NotificationBell unread={unreadNotifications} items={notificationPreview} />
-        <div className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 sm:flex-none">
-          {t.navbar.hello}, {userEmail}
-        </div>
+        <span className="hidden text-xs text-slate-400 sm:block">
+          {userEmail}
+        </span>
         <form action="/api/auth/logout" method="post">
-          <button type="submit" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700">
+          <button
+            type="submit"
+            className="rounded-lg border border-border px-3 py-1.5 text-xs text-slate-600 transition-colors hover:bg-border-subtle"
+          >
             {t.navbar.logout}
           </button>
         </form>

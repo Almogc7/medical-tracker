@@ -17,23 +17,39 @@ export function StatusBadge({
 
   const severe = expirationDate ? getExpirationSeverity(expirationDate) : "none";
 
-  const classes =
-    status === "active"
-      ? severe !== "none" && severe !== "low"
-        ? "bg-amber-100 text-amber-700 border-amber-200"
-        : "bg-emerald-100 text-emerald-700 border-emerald-200"
-      : status === "expired"
-        ? "bg-rose-100 text-rose-700 border-rose-200"
-        : "bg-slate-200 text-slate-700 border-slate-300";
+  const { dot, classes, label } = (() => {
+    if (status === "expired") {
+      return {
+        dot: "bg-status-danger",
+        classes: "bg-status-danger-bg text-status-danger",
+        label: t.status.expired,
+      };
+    }
+    if (status === "issued") {
+      return {
+        dot: "bg-status-issued",
+        classes: "bg-status-issued-bg text-status-issued",
+        label: t.status.issued,
+      };
+    }
+    if (severe !== "none" && severe !== "low") {
+      return {
+        dot: "bg-status-warning",
+        classes: "bg-status-warning-bg text-status-warning",
+        label: t.status.expiringSoon,
+      };
+    }
+    return {
+      dot: "bg-status-healthy",
+      classes: "bg-status-healthy-bg text-status-healthy",
+      label: t.status.active,
+    };
+  })();
 
-  const label =
-    status === "active"
-      ? severe !== "none" && severe !== "low"
-        ? t.status.expiringSoon
-        : t.status.active
-      : status === "expired"
-        ? t.status.expired
-        : t.status.issued;
-
-  return <span className={cn("inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold", classes)}>{label}</span>;
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", classes)}>
+      <span className={cn("h-1.5 w-1.5 rounded-full flex-shrink-0", dot)} aria-hidden="true" />
+      {label}
+    </span>
+  );
 }

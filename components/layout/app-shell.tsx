@@ -33,7 +33,7 @@ export function AppShell({
 
   return (
     <LocaleProvider value={localeContext}>
-      <div className="min-h-screen overflow-x-hidden bg-slate-100">
+      <div className="min-h-screen overflow-x-hidden bg-canvas">
         <div className="md:flex md:min-h-screen">
           <Sidebar mobileOpen={mobileMenuOpen} onClose={closeMobileMenu} />
           <div className="flex-1">
