@@ -69,6 +69,8 @@ export async function getDashboardData() {
       person: item.person.fullName,
       expirationDate: item.expirationDate,
       daysRemaining: getReadableDaysRemaining(item.expirationDate),
+      totalPacks: item.totalPacks,
+      usedPacks: item.usedPacks,
     })),
     recentActivity: recentActivity.map((activity) => ({
       id: activity.id,
@@ -99,6 +101,8 @@ export async function getDashboardData() {
       title: item.title,
       person: item.person.fullName,
       daysRemaining: getReadableDaysRemaining(item.expirationDate),
+      totalPacks: item.totalPacks,
+      usedPacks: item.usedPacks,
     })),
   };
 }

@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 
+import { IssuableList } from "@/components/dashboard/issuable-list";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import { ProtectedPage } from "@/components/layout/protected-page";
 import { Card } from "@/components/ui/card";
@@ -27,17 +28,9 @@ export default async function DashboardPage() {
       <div className="mt-5 grid gap-4 xl:grid-cols-2">
         <Card>
           <h2 className="text-base font-semibold text-slate-900">{t.dashboard.upcomingExpirations}</h2>
-          <div className="mt-3 space-y-2">
+          <div className="mt-3">
             {data.upcomingExpirations.length ? (
-              data.upcomingExpirations.map((item) => (
-                <div key={item.id} className="rounded-xl border border-slate-200 p-3">
-                  <p className="font-medium text-slate-900">{item.title}</p>
-                  <p className="text-sm text-slate-600">{item.person}</p>
-                  <p className="text-xs text-slate-500">
-                    {format(item.expirationDate, "yyyy-MM-dd")} ({item.daysRemaining})
-                  </p>
-                </div>
-              ))
+              <IssuableList items={data.upcomingExpirations} />
             ) : (
               <EmptyState title={t.common.empty} message={t.dashboard.upcomingExpirations} />
             )}
@@ -46,15 +39,9 @@ export default async function DashboardPage() {
 
         <Card>
           <h2 className="text-base font-semibold text-slate-900">{t.dashboard.urgentAlerts}</h2>
-          <div className="mt-3 space-y-2">
+          <div className="mt-3">
             {data.urgent.length ? (
-              data.urgent.map((item) => (
-                <div key={item.id} className="rounded-xl border border-rose-200 bg-rose-50 p-3">
-                  <p className="font-medium text-rose-800">{item.title}</p>
-                  <p className="text-sm text-rose-700">{item.person}</p>
-                  <p className="text-xs text-rose-600">{item.daysRemaining}</p>
-                </div>
-              ))
+              <IssuableList items={data.urgent} urgent />
             ) : (
               <EmptyState title={t.common.empty} message={t.dashboard.urgentAlerts} />
             )}

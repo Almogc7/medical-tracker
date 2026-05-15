@@ -9,7 +9,7 @@ import { getApiSession } from "@/lib/auth";
 import { MAX_UPLOAD_SIZE_BYTES } from "@/lib/constants";
 import { formatDateInIsrael } from "@/utils/date";
 import { generateStoredFilename, sanitizeFilename } from "@/utils/files";
-import { detectDatesFromText, detectMonthlyDateRangesFromText, extractPdfText } from "@/utils/pdf";
+import { detectDatesFromText, detectMonthlyDateRangesFromText, detectPacksFromText, extractPdfText } from "@/utils/pdf";
 
 export async function POST(request: Request) {
   const session = await getApiSession();
@@ -43,6 +43,7 @@ export async function POST(request: Request) {
 
   const parsed = detectDatesFromText(extractedText);
   const monthlyRanges = detectMonthlyDateRangesFromText(extractedText);
+  const suggestedPacks = detectPacksFromText(extractedText);
   let uploadToken: string = randomUUID();
   const filename = generateStoredFilename(file.name);
 
@@ -72,5 +73,6 @@ export async function POST(request: Request) {
     })),
     confidence: parsed.confidence,
     extractedText,
+    suggestedPacks,
   });
 }

@@ -118,6 +118,16 @@ export function detectMonthlyDateRangesFromText(text: string) {
   return ranges;
 }
 
+const HEBREW_TOTAL_GRAMS_REGEX = /סה["״]כ\s*(\d+(?:\.\d+)?)\s*גרם/;
+
+export function detectPacksFromText(text: string): number | null {
+  const match = text.match(HEBREW_TOTAL_GRAMS_REGEX);
+  if (!match) return null;
+  const grams = parseFloat(match[1]);
+  if (!grams || grams <= 0) return null;
+  return Math.max(1, Math.floor(grams / 10));
+}
+
 export async function extractPdfText(buffer: Buffer) {
   const pdfParseModule = await import("pdf-parse/lib/pdf-parse.js");
   const pdfParse = pdfParseModule.default as (dataBuffer: Buffer) => Promise<{ text?: string }>;

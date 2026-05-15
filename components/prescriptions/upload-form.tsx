@@ -14,6 +14,7 @@ type ParseResult = {
   startDate: string;
   expirationDate: string;
   confidence: number;
+  suggestedPacks: number | null;
   monthEntries?: { startDate: string; expirationDate: string }[];
 };
 
@@ -27,6 +28,7 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
   const [personId, setPersonId] = useState(people[0]?.id ?? "");
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
+  const [totalPacks, setTotalPacks] = useState(1);
   const [file, setFile] = useState<File | null>(null);
   const [parsed, setParsed] = useState<ParseResult | null>(null);
   const [monthEntries, setMonthEntries] = useState<MonthEntry[]>([]);
@@ -62,6 +64,7 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
       const parseResult = payload as ParseResult;
       setParsed(parseResult);
       setTitle(parseResult.suggestedTitle || title);
+      if (parseResult.suggestedPacks) setTotalPacks(parseResult.suggestedPacks);
       const parsedEntries = Array.isArray(parseResult.monthEntries)
         ? parseResult.monthEntries.filter((entry: MonthEntry) => entry.startDate && entry.expirationDate)
         : [];
@@ -108,6 +111,7 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
         personId,
         baseTitle: title,
         notes,
+        totalPacks,
         monthEntries,
         uploadToken: parsed.uploadToken,
         originalFileName: parsed.originalFileName,
@@ -129,6 +133,7 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
     setMonthEntries([]);
     setTitle("");
     setNotes("");
+    setTotalPacks(1);
   }
 
   function updateMonthEntry(index: number, patch: Partial<MonthEntry>) {
@@ -187,14 +192,26 @@ export function UploadForm({ people }: { people: PersonOption[] }) {
 
       {parsed ? (
         <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <label className="block space-y-1 text-sm">
-            <span className="text-slate-600">{t.prescriptions.table.title}</span>
-            <input
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
-            />
-          </label>
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="block space-y-1 text-sm">
+              <span className="text-slate-600">{t.prescriptions.table.title}</span>
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+              />
+            </label>
+            <label className="block space-y-1 text-sm">
+              <span className="text-slate-600">{t.prescriptions.totalPacks}</span>
+              <input
+                type="number"
+                min={1}
+                value={totalPacks}
+                onChange={(event) => setTotalPacks(Math.max(1, parseInt(event.target.value, 10) || 1))}
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2"
+              />
+            </label>
+          </div>
 
           {monthEntries.map((entry, index) => (
             <div key={`${entry.startDate}-${entry.expirationDate}-${index}`} className="space-y-2 rounded-lg border border-amber-200 bg-white p-3">

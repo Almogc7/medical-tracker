@@ -19,24 +19,107 @@ type Row = {
   expirationDateValue: string;
   daysRemaining: string;
   pdfPath: string;
+  totalPacks: number;
+  usedPacks: number;
 };
+
+function UsePacksDialog({
+  open,
+  remaining,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  remaining: number;
+  onConfirm: (packs: number) => void;
+  onCancel: () => void;
+}) {
+  const { t } = useLocale();
+  const [value, setValue] = useState("1");
+
+  if (!open) return null;
+
+  const parsed = parseInt(value, 10);
+  const valid = !isNaN(parsed) && parsed >= 1 && parsed <= remaining;
+
+  function handleConfirm() {
+    if (valid) {
+      onConfirm(parsed);
+      setValue("1");
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+        <h2 className="text-base font-semibold text-slate-900">{t.prescriptions.usePacksTitle}</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          {t.prescriptions.usePacksDescription} ({remaining} {t.prescriptions.packsRemaining})
+        </p>
+        <input
+          type="number"
+          min={1}
+          max={remaining}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          autoFocus
+        />
+        {!valid && value !== "" && (
+          <p className="mt-1 text-xs text-rose-600">{t.prescriptions.usePacksInvalid}</p>
+        )}
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={!valid}
+            className="flex-1 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {t.common.confirm}
+          </button>
+          <button
+            type="button"
+            onClick={() => { onCancel(); setValue("1"); }}
+            className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700"
+          >
+            {t.common.cancel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function PrescriptionTable({
   rows,
-  onMarkIssued,
+  onUsePacks,
   onUndoIssued,
   onDelete,
 }: {
   rows: Row[];
-  onMarkIssued: (id: string) => Promise<void>;
+  onUsePacks: (id: string, packs: number) => Promise<void>;
   onUndoIssued: (id: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }) {
   const { t } = useLocale();
-  const [targetId, setTargetId] = useState<string | null>(null);
+  const [packTargetId, setPackTargetId] = useState<string | null>(null);
   const [targetDeleteId, setTargetDeleteId] = useState<string | null>(null);
 
+  const packTarget = rows.find((r) => r.id === packTargetId) ?? null;
+  const remaining = packTarget ? packTarget.totalPacks - packTarget.usedPacks : 0;
+
+  function renderPackBadge(row: Row) {
+    const rem = row.totalPacks - row.usedPacks;
+    return (
+      <span className="text-xs text-slate-500">
+        {row.usedPacks}/{row.totalPacks} {t.prescriptions.packsRemaining.replace("remaining", "used").replace("נותרו", "שנוצלו")}
+        {rem > 0 && row.status !== "issued" ? ` · ${rem} left` : ""}
+      </span>
+    );
+  }
+
   function renderActions(row: Row, stacked = false) {
+    const rem = row.totalPacks - row.usedPacks;
     return (
       <div className={stacked ? "grid gap-2 sm:flex sm:flex-wrap" : "flex flex-wrap gap-2"}>
         <Link
@@ -46,15 +129,15 @@ export function PrescriptionTable({
         >
           {t.common.viewPdf}
         </Link>
-        {row.status !== "issued" ? (
+        {row.status !== "issued" && rem > 0 ? (
           <button
             type="button"
-            onClick={() => setTargetId(row.id)}
+            onClick={() => setPackTargetId(row.id)}
             className="rounded-lg bg-slate-900 px-2 py-2 text-xs font-semibold text-white sm:py-1"
           >
-            {t.common.markIssued}
+            {t.common.usePacks}
           </button>
-        ) : (
+        ) : row.status === "issued" ? (
           <button
             type="button"
             onClick={() => onUndoIssued(row.id)}
@@ -62,7 +145,7 @@ export function PrescriptionTable({
           >
             {t.common.undoIssued}
           </button>
-        )}
+        ) : null}
         <Link href={`/prescriptions/${row.id}`} className="rounded-lg border border-slate-300 px-2 py-2 text-center text-xs text-slate-700 sm:py-1">
           {t.common.actions}
         </Link>
@@ -85,6 +168,7 @@ export function PrescriptionTable({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-base font-medium text-slate-900">{row.title}</p>
+                <div className="mt-1">{renderPackBadge(row)}</div>
                 <div className="mt-2">
                   <StatusBadge status={row.status} expirationDate={new Date(row.expirationDateValue)} />
                 </div>
@@ -117,6 +201,7 @@ export function PrescriptionTable({
             <tr>
               <th className="px-4 py-3">{t.prescriptions.table.title}</th>
               <th className="px-4 py-3">{t.prescriptions.table.status}</th>
+              <th className="px-4 py-3">{t.prescriptions.totalPacks}</th>
               <th className="px-4 py-3">{t.prescriptions.table.startDate}</th>
               <th className="px-4 py-3">{t.prescriptions.table.expirationDate}</th>
               <th className="px-4 py-3">{t.prescriptions.table.daysRemaining}</th>
@@ -130,6 +215,7 @@ export function PrescriptionTable({
                 <td className="px-4 py-3">
                   <StatusBadge status={row.status} expirationDate={new Date(row.expirationDateValue)} />
                 </td>
+                <td className="px-4 py-3 text-slate-600">{renderPackBadge(row)}</td>
                 <td className="px-4 py-3 text-slate-600">{row.startDate}</td>
                 <td className="px-4 py-3 text-slate-600">{row.expirationDate}</td>
                 <td className="px-4 py-3 text-slate-600">{row.daysRemaining}</td>
@@ -140,19 +226,14 @@ export function PrescriptionTable({
         </table>
       </div>
 
-      <ConfirmationDialog
-        open={Boolean(targetId)}
-        title={t.common.markIssued}
-        description={t.prescriptions.confirmIssue}
-        confirmLabel={t.common.confirm}
-        cancelLabel={t.common.cancel}
-        onCancel={() => setTargetId(null)}
-        onConfirm={async () => {
-          if (targetId) {
-            await onMarkIssued(targetId);
-          }
-          setTargetId(null);
+      <UsePacksDialog
+        open={Boolean(packTargetId) && remaining > 0}
+        remaining={remaining}
+        onConfirm={async (packs) => {
+          if (packTargetId) await onUsePacks(packTargetId, packs);
+          setPackTargetId(null);
         }}
+        onCancel={() => setPackTargetId(null)}
       />
 
       <ConfirmationDialog
@@ -163,9 +244,7 @@ export function PrescriptionTable({
         cancelLabel={t.common.cancel}
         onCancel={() => setTargetDeleteId(null)}
         onConfirm={async () => {
-          if (targetDeleteId) {
-            await onDelete(targetDeleteId);
-          }
+          if (targetDeleteId) await onDelete(targetDeleteId);
           setTargetDeleteId(null);
         }}
       />

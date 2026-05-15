@@ -49,6 +49,8 @@ model Prescription {
   expirationDate   DateTime
   status           PrescriptionStatus @default(active)
   issuedAt         DateTime?
+  totalPacks       Int                @default(1)
+  usedPacks        Int                @default(0)
   notes            String?
   notifications    Notification[]
   auditLogs        AuditLog[]

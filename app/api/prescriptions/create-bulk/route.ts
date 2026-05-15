@@ -23,6 +23,7 @@ const payloadSchema = z.object({
   uploadToken: z.string().min(1),
   originalFileName: z.string().min(1),
   extractedText: z.string().optional(),
+  totalPacks: z.number().int().min(1).optional(),
   monthEntries: z.array(monthEntrySchema).min(1),
 });
 
@@ -86,6 +87,7 @@ export async function POST(request: Request) {
           pdfPath,
           originalFileName: data.originalFileName,
           extractedText: data.extractedText,
+          totalPacks: data.totalPacks ?? 1,
           status: autoStatusUpdate({
             expirationDate,
             currentStatus: "active",

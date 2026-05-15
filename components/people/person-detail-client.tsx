@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 
 import type { PrescriptionStatus } from "@/types/domain";
 
-import { deletePrescriptionAction, markIssuedAction, undoIssuedAction } from "@/app/actions";
+import { deletePrescriptionAction, undoIssuedAction, usePacksAction } from "@/app/actions";
 import { PrescriptionTable } from "@/components/prescriptions/prescription-table";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 import { useLocale } from "@/components/ui/locale-provider";
@@ -19,6 +19,8 @@ type PrescriptionRow = {
   daysRemainingValue: number;
   daysRemaining: string;
   pdfPath: string;
+  totalPacks: number;
+  usedPacks: number;
 };
 
 export function PersonDetailClient({ rows }: { rows: PrescriptionRow[] }) {
@@ -51,9 +53,9 @@ export function PersonDetailClient({ rows }: { rows: PrescriptionRow[] }) {
       <FilterTabs items={tabs} value={filter} onChange={setFilter} />
       <PrescriptionTable
         rows={filtered}
-        onMarkIssued={async (id) => {
+        onUsePacks={async (id, packs) => {
           startTransition(async () => {
-            await markIssuedAction(id);
+            await usePacksAction(id, packs);
           });
         }}
         onUndoIssued={async (id) => {

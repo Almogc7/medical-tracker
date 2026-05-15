@@ -39,20 +39,30 @@ export async function syncPrescriptionStatuses() {
   );
 }
 
-export async function markPrescriptionIssued(prescriptionId: string) {
+export async function usePrescriptionPacks(prescriptionId: string, packsToUse: number) {
+  const prescription = await prisma.prescription.findUniqueOrThrow({
+    where: { id: prescriptionId },
+  });
+
+  const remaining = prescription.totalPacks - prescription.usedPacks;
+  const clamped = Math.min(packsToUse, remaining);
+  const newUsed = prescription.usedPacks + clamped;
+  const fullyUsed = newUsed >= prescription.totalPacks;
+
   const updated = await prisma.prescription.update({
     where: { id: prescriptionId },
     data: {
-      status: "issued",
-      issuedAt: new Date(),
+      usedPacks: newUsed,
+      ...(fullyUsed ? { status: "issued", issuedAt: new Date() } : {}),
     },
   });
 
+  const newRemaining = prescription.totalPacks - newUsed;
   await prisma.auditLog.create({
     data: {
       prescriptionId,
-      action: "issued",
-      details: "Prescription marked as issued",
+      action: "used_packs",
+      details: `Used ${clamped} pack(s). ${newRemaining} remaining.`,
     },
   });
 
@@ -75,6 +85,7 @@ export async function undoPrescriptionIssued(prescriptionId: string) {
     data: {
       status,
       issuedAt: null,
+      usedPacks: 0,
     },
   });
 

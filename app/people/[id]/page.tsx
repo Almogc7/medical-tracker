@@ -39,6 +39,8 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
     daysRemainingValue: daysUntilExpiration(prescription.expirationDate),
     daysRemaining: getReadableDaysRemaining(prescription.expirationDate),
     pdfPath: prescription.pdfPath,
+    totalPacks: prescription.totalPacks,
+    usedPacks: prescription.usedPacks,
   }));
 
   return (

@@ -35,6 +35,7 @@ export type TranslationDict = {
     viewPdf: string;
     markIssued: string;
     undoIssued: string;
+    usePacks: string;
     uploadPrescription: string;
     startsOn: string;
     expiresOn: string;
@@ -105,6 +106,11 @@ export type TranslationDict = {
     nothingToSave: string;
     noPeopleAvailable: string;
     selectPersonBeforeSave: string;
+    totalPacks: string;
+    packsRemaining: string;
+    usePacksTitle: string;
+    usePacksDescription: string;
+    usePacksInvalid: string;
   };
   notifications: {
     title: string;
