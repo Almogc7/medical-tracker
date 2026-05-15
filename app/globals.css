@@ -1,34 +1,42 @@
 @import "tailwindcss";
 
 @theme {
-  /* Accent — deep forest sage. Avoids healthcare-teal and SaaS-blue reflexes. */
-  --color-accent: oklch(40% 0.13 155);
-  --color-accent-hover: oklch(34% 0.13 155);
-  --color-accent-fg: oklch(98% 0.004 100);
-  --color-accent-subtle: oklch(94% 0.04 155);
+  /* ─── Accent — deep forest sage ──────────────────────────────────────────── */
+  /* Avoids healthcare-teal (first-order) and SaaS-blue (second-order) reflexes */
+  --color-accent:        oklch(40% 0.13 155);
+  --color-accent-hover:  oklch(34% 0.13 155);
+  --color-accent-fg:     oklch(98% 0.004 100);
+  --color-accent-subtle: oklch(94% 0.04  155);
 
-  /* Canvas + surface — warm parchment, not cold slate */
-  --color-canvas: oklch(97% 0.008 100);
-  --color-surface: oklch(99.5% 0.004 100);
-  --color-border: oklch(88.5% 0.010 100);
-  --color-border-subtle: oklch(93% 0.007 100);
+  /* ─── Canvas + surface — warm parchment ──────────────────────────────────── */
+  --color-canvas:         oklch(97%   0.008 100);
+  --color-surface:        oklch(99.5% 0.004 100);
+  --color-border:         oklch(88.5% 0.010 100);
+  --color-border-subtle:  oklch(93%   0.007 100);
 
-  /* Sidebar — dark chrome for clear content separation */
-  --color-sidebar: oklch(17% 0.016 100);
-  --color-sidebar-hover: oklch(24% 0.016 100);
-  --color-sidebar-active: oklch(40% 0.13 155);
-  --color-sidebar-text: oklch(62% 0.012 100);
-  --color-sidebar-text-active: oklch(97% 0.006 100);
+  /* ─── Sidebar — dark chrome ───────────────────────────────────────────────── */
+  --color-sidebar:              oklch(17% 0.016 100);
+  --color-sidebar-hover:        oklch(24% 0.016 100);
+  --color-sidebar-active:       oklch(40% 0.13  155);
+  --color-sidebar-text:         oklch(62% 0.012 100);
+  --color-sidebar-text-active:  oklch(97% 0.006 100);
 
-  /* Status semantics */
-  --color-status-healthy: oklch(45% 0.15 145);
-  --color-status-healthy-bg: oklch(95% 0.045 145);
-  --color-status-warning: oklch(50% 0.17 80);
-  --color-status-warning-bg: oklch(96% 0.05 80);
-  --color-status-danger: oklch(48% 0.20 25);
-  --color-status-danger-bg: oklch(96% 0.06 25);
-  --color-status-issued: oklch(50% 0.06 240);
-  --color-status-issued-bg: oklch(95% 0.025 240);
+  /* ─── Semantic status ────────────────────────────────────────────────────── */
+  --color-status-healthy:     oklch(45% 0.15 145);
+  --color-status-healthy-bg:  oklch(95% 0.045 145);
+  --color-status-warning:     oklch(50% 0.17  80);
+  --color-status-warning-bg:  oklch(96% 0.05   80);
+  --color-status-danger:      oklch(48% 0.20  25);
+  --color-status-danger-bg:   oklch(96% 0.06   25);
+  --color-status-issued:      oklch(50% 0.06 240);
+  --color-status-issued-bg:   oklch(95% 0.025 240);
+
+  /* ─── Radius scale ───────────────────────────────────────────────────────── */
+  /* Components (inputs, buttons, badges)  → rounded-component = 8px           */
+  /* Panels (cards, dialogs, drawers)      → rounded-panel     = 12px           */
+  /* Pill shapes                           → rounded-full (Tailwind default)    */
+  --radius-component: 8px;
+  --radius-panel:     12px;
 }
 
 :root {
@@ -43,6 +51,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ─── Base ───────────────────────────────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
@@ -51,12 +60,11 @@ body {
   font-optical-sizing: auto;
 }
 
-h1, h2, h3 {
-  text-wrap: balance;
-}
+h1, h2, h3 { text-wrap: balance; }
 
+/* ─── Focus ring — all interactive elements ──────────────────────────────── */
 *:focus-visible {
   outline: 2px solid oklch(40% 0.13 155);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: 4px;
 }
