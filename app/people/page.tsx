@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 
 import { addPersonAction, removePersonAction } from "@/app/people/actions";
+import { SetPacksForPerson } from "@/components/people/set-packs-for-person";
 import { ProtectedPage } from "@/components/layout/protected-page";
 import { PersonCard } from "@/components/people/person-card";
 import { Card } from "@/components/ui/card";
@@ -93,20 +94,25 @@ export default async function PeoplePage({
             .sort((a, b) => a.expirationDate.getTime() - b.expirationDate.getTime())[0];
 
           return (
-            <PersonCard
-              key={person.id}
-              id={person.id}
-              name={person.fullName}
-              activeCount={activeCount}
-              issuedCount={issuedCount}
-              nearestExpiration={nearest ? format(nearest.expirationDate, "yyyy-MM-dd") : "-"}
-              warning={nearest ? daysUntilExpiration(nearest.expirationDate) <= 7 : false}
-              labels={{
-                active: t.people.activeCount,
-                issued: t.people.issuedCount,
-                nearest: t.people.nearestExpiration,
-              }}
-            />
+            <div key={person.id}>
+              <PersonCard
+                id={person.id}
+                name={person.fullName}
+                activeCount={activeCount}
+                issuedCount={issuedCount}
+                nearestExpiration={nearest ? format(nearest.expirationDate, "yyyy-MM-dd") : "-"}
+                warning={nearest ? daysUntilExpiration(nearest.expirationDate) <= 7 : false}
+                labels={{
+                  active: t.people.activeCount,
+                  issued: t.people.issuedCount,
+                  nearest: t.people.nearestExpiration,
+                }}
+              />
+              <SetPacksForPerson
+                personId={person.id}
+                prescriptionCount={person.prescriptions.length}
+              />
+            </div>
           );
         })}
       </div>

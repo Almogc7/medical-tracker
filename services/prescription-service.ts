@@ -107,6 +107,13 @@ export async function updatePrescriptionTotalPacks(prescriptionId: string, total
   });
 }
 
+export async function setAllPacksForPerson(personId: string, totalPacks: number) {
+  await prisma.prescription.updateMany({
+    where: { personId },
+    data: { totalPacks },
+  });
+}
+
 export async function deletePrescription(prescriptionId: string) {
   await prisma.auditLog.create({
     data: {
