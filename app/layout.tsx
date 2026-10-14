@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getDictionary } from "@/lib/i18n";
@@ -16,6 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Prescription Tracker",
   description: "Medical cannabis prescription tracking dashboard",
+};
+
+// viewport-fit=cover lets env(safe-area-inset-*) report real values, which the mobile bottom nav relies on.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({

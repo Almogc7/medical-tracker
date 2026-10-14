@@ -24,7 +24,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <label htmlFor={id} className="text-sm font-medium text-foreground-muted">
             {label}
             {required ? (
-              <span className="ml-0.5 text-status-danger" aria-hidden="true">*</span>
+              <span className="ms-0.5 text-status-danger" aria-hidden="true">*</span>
             ) : null}
           </label>
         ) : null}

@@ -1,29 +1,24 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { PersonDetailClient } from "@/components/people/person-detail-client";
+import { deletePrescriptionAction, undoIssuedAction, usePacksAction } from "@/app/actions";
 import { ProtectedPage } from "@/components/layout/protected-page";
-import { PageHeader } from "@/components/ui/page-header";
-import { getDictionary } from "@/lib/i18n";
+import { PersonDetailView } from "@/components/people/person-detail-view";
 import { prisma } from "@/lib/prisma";
-import { getReadableDaysRemaining } from "@/services/prescription-service";
-import { daysUntilExpiration, formatDateInIsrael } from "@/utils/date";
+import { formatDateInIsrael } from "@/utils/date";
+import { daysUntilIsrael } from "@/utils/israel-time";
 
 export const dynamic = "force-dynamic";
 
 export default async function PersonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [{ t }, person] = await Promise.all([
-    getDictionary(),
-    prisma.person.findUnique({
-      where: { id },
-      include: {
-        prescriptions: {
-          orderBy: { expirationDate: "asc" },
-        },
+  const person = await prisma.person.findUnique({
+    where: { id },
+    include: {
+      prescriptions: {
+        orderBy: { expirationDate: "asc" },
       },
-    }),
-  ]);
+    },
+  });
 
   if (!person) {
     notFound();
@@ -36,8 +31,7 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
     startDate: formatDateInIsrael(prescription.startDate),
     expirationDate: formatDateInIsrael(prescription.expirationDate),
     expirationDateValue: prescription.expirationDate.toISOString(),
-    daysRemainingValue: daysUntilExpiration(prescription.expirationDate),
-    daysRemaining: getReadableDaysRemaining(prescription.expirationDate),
+    daysRemainingValue: daysUntilIsrael(prescription.expirationDate),
     pdfPath: prescription.pdfPath,
     totalPacks: prescription.totalPacks,
     usedPacks: prescription.usedPacks,
@@ -45,16 +39,13 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
 
   return (
     <ProtectedPage>
-      <PageHeader
-        title={person.fullName}
-        subtitle={t.person.prescriptions}
-        actions={
-          <Link href="/upload" className="inline-flex h-10 items-center rounded-[var(--radius-component)] bg-accent px-4 text-sm font-semibold text-accent-fg transition-colors hover:bg-accent-hover">
-            {t.common.uploadPrescription}
-          </Link>
-        }
+      <PersonDetailView
+        person={{ id: person.id, name: person.fullName, note: person.note?.trim() ? person.note : null }}
+        rows={rows}
+        onUsePacks={usePacksAction}
+        onUndoIssued={undoIssuedAction}
+        onDelete={deletePrescriptionAction}
       />
-      <PersonDetailClient rows={rows} />
     </ProtectedPage>
   );
 }

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { getSession, logout } from "@/lib/auth";
-import { deletePrescription, setAllPacksForPerson, undoPrescriptionIssued, updatePrescriptionTotalPacks, usePrescriptionPacks } from "@/services/prescription-service";
+import { deletePrescription, setAllPacksForPerson, undoPrescriptionIssued, updatePrescriptionTotalPacks, usePrescriptionPacks as applyPrescriptionPacks } from "@/services/prescription-service";
 
 export async function usePacksAction(id: string, packs: number) {
   const session = await getSession();
@@ -11,7 +11,7 @@ export async function usePacksAction(id: string, packs: number) {
     throw new Error("Unauthorized");
   }
 
-  await usePrescriptionPacks(id, packs);
+  await applyPrescriptionPacks(id, packs);
   revalidatePath("/dashboard");
   revalidatePath("/people");
   revalidatePath("/notifications");

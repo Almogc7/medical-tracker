@@ -1,81 +1,72 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
+
+import { fill } from "@/components/prescriptions/prescription-format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { updateTotalPacksAction } from "@/app/actions";
+import { useLocale } from "@/components/ui/locale-provider";
+import { useAsyncAction } from "@/components/ui/use-async-action";
 
+/**
+ * Edit a prescription's total packs. Controlled: `totalPacks` only changes after `onSave` resolves,
+ * so the displayed number is never ahead of what the backend accepted.
+ */
 export function EditTotalPacks({
-  prescriptionId,
   totalPacks,
   usedPacks,
+  onSave,
 }: {
-  prescriptionId: string;
   totalPacks: number;
   usedPacks: number;
+  onSave: (totalPacks: number) => Promise<void>;
 }) {
-  const inputId         = useId();
-  const [editing, setEditing]       = useState(false);
-  const [value, setValue]           = useState(String(totalPacks));
-  const [saved, setSaved]           = useState(totalPacks);
-  const [, startTransition]         = useTransition();
+  const { t } = useLocale();
+  const inputId = useId();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(String(totalPacks));
+  const { run, pending, failed, clearFailed } = useAsyncAction();
 
+  const min = Math.max(1, usedPacks);
   const parsed = parseInt(value, 10);
-  const valid  = !isNaN(parsed) && parsed >= usedPacks && parsed >= 1;
-  const error  = value !== "" && !valid
-    ? `Minimum ${Math.max(1, usedPacks)} (current usage)`
-    : undefined;
+  const valid = !Number.isNaN(parsed) && parsed >= min;
+  const error = value !== "" && !valid ? fill(t.prescriptions.totalPacksMin, { n: min }) : undefined;
 
-  function handleSave() {
+  async function save() {
     if (!valid) return;
-    startTransition(async () => {
-      await updateTotalPacksAction(prescriptionId, parsed);
-      setSaved(parsed);
-      setEditing(false);
-    });
+    if (await run(() => onSave(parsed))) setEditing(false);
+  }
+
+  function cancel() {
+    setEditing(false);
+    clearFailed();
   }
 
   if (!editing) {
     return (
-      <div className="flex items-center gap-2 text-sm text-foreground-muted">
-        <span>
-          Total Packs: <strong className="tabular-nums text-foreground">{saved}</strong>
-          <span className="ml-1 text-foreground-subtle">
-            ({usedPacks} used, {saved - usedPacks} remaining)
-          </span>
-        </span>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => { setValue(String(saved)); setEditing(true); }}
-        >
-          Edit
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-foreground-muted">
+          {t.prescriptions.totalPacks}: <strong className="tabular-nums text-foreground">{totalPacks}</strong>
+        </p>
+        <Button variant="secondary" size="sm" className="touch-manipulation" onClick={() => { setValue(String(totalPacks)); setEditing(true); }}>
+          {t.common.edit}
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-wrap items-start gap-2">
-      <Input
-        id={inputId}
-        label="Total Packs"
-        type="number"
-        min={Math.max(1, usedPacks)}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        error={error}
-        className="w-28"
-        autoFocus
-      />
-      <div className="flex items-end gap-2 self-end pb-px">
-        <Button variant="primary" size="sm" disabled={!valid} onClick={handleSave}>
-          Save
-        </Button>
-        <Button variant="secondary" size="sm" onClick={() => setEditing(false)}>
-          Cancel
-        </Button>
+    <div>
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="min-w-[8rem] flex-1">
+          <Input id={inputId} label={t.prescriptions.totalPacks} type="number" min={min} inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} error={error} disabled={pending} autoFocus className="h-11" />
+        </div>
+        <div className="flex gap-2 pb-px">
+          <Button variant="primary" size="sm" className="touch-manipulation" disabled={!valid} loading={pending} onClick={save}>{t.common.save}</Button>
+          <Button variant="secondary" size="sm" className="touch-manipulation" disabled={pending} onClick={cancel}>{t.common.cancel}</Button>
+        </div>
       </div>
+      {failed ? <p role="alert" className="mt-2 text-xs font-medium text-status-danger">{t.common.actionFailed}</p> : null}
     </div>
   );
 }

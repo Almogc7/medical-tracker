@@ -16,16 +16,21 @@ export async function ProtectedPage({ children }: { children: React.ReactNode })
   await sendTelegramAlertsIfNeeded();
   await sendLicenseRenewalAlertsIfNeeded();
 
-  const notifications = await prisma.notification.findMany({
-    where: { isRead: false },
-    orderBy: { createdAt: "desc" },
-    take: 5,
-  });
+  // Read-only: the 5 newest unread for the bell dropdown, plus the true unread total for the badge
+  // (the list is capped at 5, so its length alone under-counts).
+  const [notifications, unreadTotal] = await Promise.all([
+    prisma.notification.findMany({
+      where: { isRead: false },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+    prisma.notification.count({ where: { isRead: false } }),
+  ]);
 
   return (
     <AppShell
       localeContext={localeContext}
-      unreadNotifications={notifications.length}
+      unreadNotifications={unreadTotal}
       notificationPreview={notifications.map((notification) => ({
         id: notification.id,
         title: notification.title,

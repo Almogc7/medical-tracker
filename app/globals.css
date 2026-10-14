@@ -16,7 +16,8 @@
 
   /* ─── Foreground scale ───────────────────────────────────────────────────── */
   --color-foreground-muted:  oklch(44% 0.010 80);
-  --color-foreground-subtle: oklch(60% 0.008 80);
+  /* Darkened from 60% so small captions and placeholders meet WCAG AA (>= 4.5:1 on canvas, surface and tinted fills). */
+  --color-foreground-subtle: oklch(50% 0.008 80);
 
   /* ─── Sidebar — dark chrome ───────────────────────────────────────────────── */
   --color-sidebar:              oklch(17% 0.016 100);
